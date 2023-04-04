@@ -13,10 +13,14 @@ Future<BenchmarkPoints> getPoints(String path) async {
   return json;
 }
 
-DRTree createTree(List<Point> points) {
+DRTree createTree({
+  required List<Point> points,
+  required int minChildCount,
+  required int maxChildCount,
+}) {
   final tree = DRTree(
-    minChildCount: 6,
-    maxChildCount: 12,
+    minChildCount: minChildCount,
+    maxChildCount: maxChildCount,
   );
 
   for (var i = 0; i < points.length; i++) {
@@ -27,11 +31,16 @@ DRTree createTree(List<Point> points) {
 }
 
 void main(List<String> arguments) async {
-  if (arguments.isEmpty) {
-    throw Exception('Must be specified arguments: path (String).');
+  if (arguments.length < 3) {
+    throw Exception(
+        'Must be specified arguments: path (String), minChildCount (int, default: 4), maxChildCount (int, default: 8).');
   }
 
   final path = arguments[0];
+
+  final minChildCount = int.parse(arguments[1]);
+
+  final maxChildCount = int.parse(arguments[2]);
 
   final benchmarkPoints = await getPoints(path);
 
@@ -41,7 +50,11 @@ void main(List<String> arguments) async {
 
   var startMemory = ProcessInfo.currentRss;
 
-  final tree = createTree(benchmarkPoints.points);
+  final tree = createTree(
+    points: benchmarkPoints.points,
+    minChildCount: minChildCount,
+    maxChildCount: maxChildCount,
+  );
 
   stopwatch.stop();
 
